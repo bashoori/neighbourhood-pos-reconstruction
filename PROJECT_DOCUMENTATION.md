@@ -146,15 +146,65 @@ Persisted to `output/practice.db`:
   way to separate them), or document it as an accepted limitation of the source data's
   granularity.
 
-## Next Steps — Task 4
+## Task 4 — Build the Logical and Physical Data Model
 
-Design the logical and physical data model against `staging_line_items` and
-`staging_transactions`:
+**Objective:** Design a normalized structure from `staging_transactions` and
+`staging_line_items` — reference entities for customer, product, and store, plus a
+transaction/invoice entity and a line-item entity — and produce both an ERD and the physical
+T-SQL schema.
 
-- `dim_customer`, `dim_product`, `dim_store` — reference entities
-- `fact_transaction` — one row per reconstructed transaction, includes `invoice_number` as a
-  traceability attribute (not a key)
-- `fact_transaction_line` — one row per original line item, foreign-keyed to
-  `fact_transaction`
+### Design decisions
 
-Deliverable: an ERD plus T-SQL `CREATE TABLE` statements, per the original project brief.
+- **Natural keys used where the data supports one:** `customer_id`, `product_sku`, `store_id`.
+  `invoice_number` is never a key anywhere in the schema — Task 2 proved it isn't unique
+  (`INV-1000` reuse), so it's kept only as a traceability attribute on `fact_transaction`.
+- **Surrogate keys reused, not regenerated:** `transaction_id` and `line_id` reuse the ids
+  already produced during Task 3 reconstruction (`reconstructed_txn_id`, `row_id`) rather than
+  new `IDENTITY` values — every row in the model stays traceable back to the exact notebook
+  step that produced it.
+- **Walk-ins get no `dim_customer` row.** Blank `customer_ref` means no reliable customer key
+  exists — `fact_transaction.customer_id` is nullable rather than forced to a placeholder
+  value that would misrepresent an unknown customer as a known one.
+- **`ST99` gets an explicit `dim_store` row** (`store_name = 'UNKNOWN / UNMAPPED'`), rather
+  than leaving an orphaned foreign key or silently dropping those transactions. This resolves
+  Task 1's store mismatch finding directly in the schema instead of deferring it.
+- **`product_sku`, `qty`, and `unit_price` on `fact_transaction_line` are nullable.** A
+  handful of source rows (Task 1 findings) have no resolvable value for these — forcing a
+  placeholder (e.g. `qty = 0` or a fake SKU) would misrepresent genuinely missing data as a
+  real observation.
+- **Canonical attribute values picked by frequency, not fuzzy matching.** Where a natural key
+  is reliable but its descriptive attributes vary in spelling (customer names/emails, product
+  names, category casing), the most frequently occurring non-blank raw value is used as the
+  canonical value, rather than attempting identity resolution — the key already solves
+  identity; the attribute just needs cleanup.
+
+### Entities
+
+| Table | Grain | Key |
+|---|---|---|
+| `dim_customer` | one row per known customer | `customer_id` (natural, from `customer_ref`) |
+| `dim_product` | one row per SKU | `product_sku` (natural) |
+| `dim_store` | one row per store, including unmapped ones | `store_id` (natural) |
+| `fact_transaction` | one row per reconstructed transaction | `transaction_id` (surrogate, reused from Task 3) |
+| `fact_transaction_line` | one row per original line item | `line_id` (surrogate, reused `row_id`) |
+
+Physical schema: `sql/schema.sql` (T-SQL). ETL and verification: `notebooks/04_model.ipynb`.
+
+### Verification
+
+Built and tested end to end before handing off:
+
+- All 5 tables create cleanly from the T-SQL DDL (SQLite's type affinity accepts `NVARCHAR`,
+  `DATETIME2`, `DECIMAL`, `BIT` as written, no rewrite needed to prove the schema out locally).
+- Row counts: `dim_customer` 6, `dim_product` 10, `dim_store` 5 (4 from `store_lookup.csv` + 1
+  placeholder for `ST99`), `fact_transaction` 63, `fact_transaction_line` 131.
+- Four explicit referential integrity checks (store FK, customer FK, line→transaction FK,
+  line→product FK), each via anti-join since SQLite doesn't enforce FKs by default — **all
+  four passed with zero orphans.**
+
+### Next Steps — Task 5
+
+Resolve and formally document the store reference mismatch (already handled structurally via
+the `ST99` placeholder row in `dim_store` — Task 5 is about writing up the reasoning behind
+that decision explicitly, as the brief requires a documented judgment call, not just a working
+schema).
