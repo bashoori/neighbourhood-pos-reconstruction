@@ -3,6 +3,9 @@
 **Practice Project: POS Data Modeler**
 Self-directed prep for the Atira Data Modeler (Forms-to-Repository Migration) role — Data for Good
 
+**Status: all 7 tasks complete.** See the Deliverables Checklist below for what each task
+produced, or `PROJECT_DOCUMENTATION.md` for the full task-by-task reasoning and verification.
+
 ## Scenario
 
 You're supporting a small community retail partner, Neighbourhood Made Co-op, a nonprofit gift shop that funds a job-training program. Their point-of-sale system exports a flat CSV of transaction line items — no clean invoice structure, inconsistent formatting, and identifiers that don't always agree with the store reference list. Your job is the same shape as the real Atira brief: take raw, semi-structured operational data, validate your assumptions about how it's organized, reconstruct the real transactions hidden inside it, and turn it into a structured model someone could actually report on.
@@ -63,6 +66,8 @@ Design a normalized structure — think in terms of a transaction/invoice entity
 
 Compare `store_id` values in the export against `store_lookup.csv`. Decide and document how you'd handle any store that appears in one file but not the other — this is the same judgment call as reconciling systems during a migration.
 
+**Write-up:** [`05_STORE_RECONCILIATION.md`](05_STORE_RECONCILIATION.md) — quantifies the mismatch (~33% of revenue), weighs four options, and documents the decision plus an escalation note for how this would be handled in a real migration.
+
 ### 6. Generate analysis and a chart
 
 Using Python/pandas or Power Query, produce: revenue by category and by store, top 5 products by revenue, and a return rate. Make one simple chart (bar or line) that would support a stakeholder narrative.
@@ -70,6 +75,8 @@ Using Python/pandas or Power Query, produce: revenue by category and by store, t
 ### 7. Write the impact story
 
 In 3–5 plain-language sentences, summarize what the data shows and flag any caveats a non-technical stakeholder should know about (e.g., "revenue by store is directional, not exact, because roughly N% of transactions couldn't be reliably grouped"). This is the requirements-elicitation and communication skill the job posting calls out directly.
+
+**Write-up:** [`07_IMPACT_STORY.md`](07_IMPACT_STORY.md) — the final plain-language narrative, no jargon, caveats named directly.
 
 ## Entity Relationship Diagram
 
@@ -81,13 +88,15 @@ decision is in `PROJECT_DOCUMENTATION.md`, Task 4. Physical schema: `sql/schema.
 
 ## Deliverables Checklist
 
-- [ ] Data profiling notes (with actual counts, not just observations)
-- [ ] A written assumption log for the structure/sorting validation step
-- [ ] Your invoice reconstruction logic (script or query) plus the resulting transaction-level table
-- [ ] An ERD and T-SQL `CREATE TABLE` statements for the normalized model
-- [ ] A short write-up of how you resolved the `store_id` mismatch
-- [ ] Analysis output: category/store revenue, top products, return rate, one chart
-- [ ] A 3–5 sentence stakeholder-facing narrative
+- [x] Data profiling notes (with actual counts, not just observations) — `notebooks/01_profile.ipynb`
+- [x] A written assumption log for the structure/sorting validation step — `notebooks/02_validate_assumptions.ipynb`
+- [x] Your invoice reconstruction logic (script or query) plus the resulting transaction-level table — `notebooks/03_reconstruct_invoices.ipynb`, `output/practice.db`
+- [x] An ERD and T-SQL `CREATE TABLE` statements for the normalized model — `images/neighbourhood_pos_erd.png`, `sql/schema.sql`
+- [x] A short write-up of how you resolved the `store_id` mismatch — `05_STORE_RECONCILIATION.md`
+- [x] Analysis output: category/store revenue, top products, return rate, one chart — `notebooks/06_analysis.ipynb`, `output/revenue_by_store.png`
+- [x] A 3–5 sentence stakeholder-facing narrative — `07_IMPACT_STORY.md`
+
+Full task-by-task reasoning, findings, and verification for all 7 tasks: `PROJECT_DOCUMENTATION.md`.
 
 ## Suggested Tools & Time-Box
 
@@ -115,6 +124,8 @@ A separate file, `solution_hints.md`, is included alongside the data files — i
 neighbourhood-pos-reconstruction/
 ├── README.md
 ├── PROJECT_DOCUMENTATION.md
+├── 05_STORE_RECONCILIATION.md
+├── 07_IMPACT_STORY.md
 ├── SETUP.md
 ├── solution_hints.md
 ├── data/

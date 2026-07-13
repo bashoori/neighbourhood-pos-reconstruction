@@ -112,7 +112,7 @@ rows 62 and 64, confirming where it actually belongs. Manually reassigned
 |---|---|---|
 | `INV-1000` maps to 2 transactions | Deliberately planted register-counter-reset scenario — two real transactions share a reused invoice number | Correct behavior: the rule kept them separate rather than trusting the colliding number |
 | Row 63 / `INV-1009` mislabeled | Missing timestamp sorts to end of partition, corrupting positional ID assignment | Caught by `needs_manual_review` flag, corrected using `invoice_number` |
-| `ST01` transaction merging `INV-1007` and `INV-1013` | Date-only timestamp format collapses to midnight, losing time-of-day resolution — two distinct transactions become indistinguishable by time | **Not yet re-verified after the latest fixes** — flagged as an open item below, since `needs_manual_review` only catches *missing* timestamps, not *coarse* ones |
+| `ST01` transaction merging `INV-1007` and `INV-1013` | Date-only timestamp format collapses to midnight, losing time-of-day resolution — two distinct transactions become indistinguishable by time | **Confirmed still present** (re-verified after final fixes). Accepted as a documented limitation rather than patched further — see "Open Items" resolution below |
 
 ### Verification
 
@@ -134,17 +134,36 @@ Persisted to `output/practice.db`:
 
 ---
 
-## Open Items Before Task 4
+## Open Items — Resolved
 
-- Re-run the "does one transaction contain more than one invoice number" check
-  (`transactions[transactions["invoice_numbers_seen"].apply(len) > 1]`) after the final fixes
-  to confirm whether the `ST01` / date-only merge case (`INV-1007` + `INV-1013`) is still
-  present. It wasn't caught by `needs_manual_review` since those timestamps parsed
-  successfully — they're just too coarse to distinguish separate transactions.
-- Decide how to handle it if still present: flag for manual review (extend the review-flag
-  logic to also catch same-day, same-customer, same-register transactions with no time-based
-  way to separate them), or document it as an accepted limitation of the source data's
-  granularity.
+**Re-verification result:** the `ST01` / date-only merge case is confirmed still present after
+the final Task 3 fixes — `reconstructed_txn_id = 9` (store `ST01`, register `REG-1`) contains
+both `INV-1007` and `INV-1013`. Re-run directly against `output/practice.db`:
+
+```python
+staging_txn["n_invoices"] = staging_txn["invoice_numbers_seen"].apply(
+    lambda s: len([x for x in str(s).split(",") if x.strip()]) if s else 0
+)
+staging_txn[staging_txn["n_invoices"] > 1]
+```
+
+**Decision: documented as an accepted limitation, not patched further.** Two options were
+considered:
+
+- **Extend `needs_manual_review`** to also flag any transaction containing more than one
+  distinct invoice number, catching this case alongside the missing-timestamp case.
+- **Accept it as a documented limitation** — chosen. This is a genuine data limitation, not a
+  logic bug: a date-only timestamp format cannot physically distinguish two same-day,
+  same-customer, same-register transactions, no matter how the grouping rule is tuned. Adding
+  more heuristics to chase a single affected transaction (out of 63) is scope creep that
+  trades a clean, understood limitation for a more complex rule with its own new edge cases.
+  The stronger engineering move is recognizing *why* it can't be cleanly automated and flagging
+  it for a human to resolve, rather than over-fitting the code to one instance.
+
+**Practical impact:** this affects 1 of 63 reconstructed transactions. It does not change any
+of the Task 6 analysis conclusions materially, but if this model were going into production,
+`reconstructed_txn_id = 9` should be manually split by a data steward with access to the
+original register tape or receipt, since the source data alone cannot resolve it.
 
 ## Task 4 — Build the Logical and Physical Data Model
 
@@ -325,7 +344,7 @@ built into the chart itself, not left to a footnote someone might skip.
 non-technical stakeholder, naming caveats explicitly rather than leaving them only in a chart
 color or a notebook comment.
 
-**Deliverable:** `IMPACT_STORY.md`
+**Deliverable:** `07_IMPACT_STORY.md`
 
 > Over the period covered by this export, home goods and everyday items like notebooks and
 > mugs drove the most revenue, and returns were rare — well under 2% of all purchases. About a
@@ -359,12 +378,13 @@ All 7 tasks from the original brief are done, verified, and documented:
 | 4. Data model | `sql/schema.sql`, `04_model.ipynb`, ERD | Done |
 | 5. Store reconciliation | Documented above; implemented in `04_model.ipynb` | Done |
 | 6. Analysis + chart | `06_analysis.ipynb`, `output/revenue_by_store.png` | Done |
-| 7. Impact story | `IMPACT_STORY.md` | Done |
+| 7. Impact story | `07_IMPACT_STORY.md` | Done |
 
-One open item carried forward honestly rather than swept under the rug: whether the `ST01`
-date-only timestamp merge (`INV-1007`/`INV-1013`) is still present after the final Task 3
-fixes was flagged but not conclusively re-verified — worth a final check with the
-`multi_invoice` query in `03_reconstruct_invoices.ipynb` before calling this fully closed.
+No open items remain. The one loose thread — whether the `ST01` date-only timestamp merge
+(`INV-1007`/`INV-1013`) survived the final Task 3 fixes — was re-verified directly against
+`output/practice.db`: it does, affecting 1 of 63 transactions, and is documented above as an
+accepted limitation with a clear reason it wasn't patched further, rather than silently left
+unresolved.
 
 This project now doubles as a portfolio piece: it demonstrates profiling discipline,
 assumption testing (and being wrong about one, then fixing it), debugging a non-obvious
