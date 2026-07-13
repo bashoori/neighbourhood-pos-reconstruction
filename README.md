@@ -1,14 +1,14 @@
 # neighbourhood-pos-reconstruction
 
 **Practice Project: POS Data Modeler**
-Self-directed prep for the Atira Data Modeler (Forms-to-Repository Migration) role — Data for Good
+Self-directed prep for a Data Modeler (Forms-to-Repository Migration) volunteer role
 
 **Status: all 7 tasks complete.** See the Deliverables Checklist below for what each task
 produced, or `PROJECT_DOCUMENTATION.md` for the full task-by-task reasoning and verification.
 
 ## Scenario
 
-You're supporting a small community retail partner, Neighbourhood Made Co-op, a nonprofit gift shop that funds a job-training program. Their point-of-sale system exports a flat CSV of transaction line items — no clean invoice structure, inconsistent formatting, and identifiers that don't always agree with the store reference list. Your job is the same shape as the real Atira brief: take raw, semi-structured operational data, validate your assumptions about how it's organized, reconstruct the real transactions hidden inside it, and turn it into a structured model someone could actually report on.
+You're supporting a small community retail partner, Neighbourhood Made Co-op, a nonprofit gift shop that funds a job-training program. Their point-of-sale system exports a flat CSV of transaction line items — no clean invoice structure, inconsistent formatting, and identifiers that don't always agree with the store reference list. Your job is the same shape as the real project brief: take raw, semi-structured operational data, validate your assumptions about how it's organized, reconstruct the real transactions hidden inside it, and turn it into a structured model someone could actually report on.
 
 ## Files Provided
 
@@ -44,7 +44,7 @@ Without giving away every answer, here's the category of issues the export conta
 
 ## Tasks
 
-These map directly to the Atira job responsibilities — treat this like the actual assignment.
+These map directly to the job responsibilities — treat this like the actual assignment.
 
 ### 1. Profile the data
 

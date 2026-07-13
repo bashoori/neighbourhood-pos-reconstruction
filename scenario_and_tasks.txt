@@ -1,0 +1,62 @@
+NEIGHBOURHOOD-POS-RECONSTRUCTION
+Practice Project: POS Data Modeler
+Self-directed prep for a Data Modeler (Forms-to-Repository Migration) volunteer role
+
+SCENARIO
+
+You're supporting a small community retail partner, Neighbourhood Made Co-op, a nonprofit
+gift shop that funds a job-training program. Their point-of-sale system exports a flat CSV of
+transaction line items - no clean invoice structure, inconsistent formatting, and identifiers
+that don't always agree with the store reference list. Your job is the same shape as the real
+project brief: take raw, semi-structured operational data, validate your assumptions about how
+it's organized, reconstruct the real transactions hidden inside it, and turn it into a
+structured model someone could actually report on.
+
+FILES PROVIDED
+
+- data/raw_pos_export.csv - 131 rows, one row per product line item, generated to be
+  realistically messy.
+- data/store_lookup.csv - a small reference table mapping store_id to store_name.
+
+TASKS
+
+1. Profile the data
+Load raw_pos_export.csv and document what you find: null rates per column, duplicate rows,
+distinct value counts for store_id/category_raw/payment_method, and anything that looks
+structurally off. Write this up as a short data quality notes section - don't just eyeball
+it, show the counts.
+
+2. Validate your assumptions about structure and sorting
+Before you can reconstruct anything, state your assumptions explicitly and test them against
+the data. For example: is row_id a reliable proxy for chronological order within a register?
+Does a non-blank invoice_number always group the correct set of line items? Is transaction_ts
+sortable as-is across all its formats? Write down each assumption, how you tested it, and
+whether it held.
+
+3. Reconstruct invoices from the line items
+Define a rule for grouping line items into a single transaction when invoice_number is
+missing (for example: same store + register + customer, timestamps within a tight window of
+each other). Apply it, and then spot-check a handful of reconstructed transactions against
+the raw rows to see whether the rule holds up or over/under-groups.
+
+4. Build the logical and physical data model
+Design a normalized structure - think in terms of a transaction/invoice entity, a line-item
+entity, and reference entities for customer, product, and store. Draw the entity
+relationship diagram (boxes and keys is fine) and then write the physical schema as CREATE
+TABLE statements, ideally in T-SQL since the real role is Microsoft-platform-facing.
+
+5. Resolve the store reference mismatch
+Compare store_id values in the export against store_lookup.csv. Decide and document how
+you'd handle any store that appears in one file but not the other - this is the same
+judgment call as reconciling systems during a migration.
+
+6. Generate analysis and a chart
+Using Python/pandas or Power Query, produce: revenue by category and by store, top 5
+products by revenue, and a return rate. Make one simple chart (bar or line) that would
+support a stakeholder narrative.
+
+7. Write the impact story
+In 3-5 plain-language sentences, summarize what the data shows and flag any caveats a
+non-technical stakeholder should know about (e.g., "revenue by store is directional, not
+exact, because roughly N% of transactions couldn't be reliably grouped"). This is the
+requirements-elicitation and communication skill the job posting calls out directly.

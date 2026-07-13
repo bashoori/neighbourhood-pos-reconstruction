@@ -9,8 +9,8 @@ understand what happened.
 **Scenario:** Neighbourhood Made Co-op, a nonprofit gift shop, exports a flat CSV of POS
 transaction line items with no clean invoice structure. The goal is to profile it, validate
 assumptions about how it's organized, reconstruct the real transactions hidden inside it, and
-eventually model it into a normalized, Microsoft-platform-ready schema — practice for the
-Atira Data Modeler (Forms-to-Repository Migration) role.
+eventually model it into a normalized, Microsoft-platform-ready schema — practice for a
+Data Modeler (Forms-to-Repository Migration) volunteer role.
 
 **Environment:** GitHub Codespace, Python 3.12.1, pandas + Jupyter notebooks. See `SETUP.md`
 for the full environment setup log.

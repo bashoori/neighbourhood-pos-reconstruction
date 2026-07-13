@@ -10,7 +10,7 @@ On GitHub: **New repository** → name it (e.g. `neighbourhood-pos-reconstructio
 
 ## 2. Add the project files
 
-Upload `raw_pos_export.csv`, `store_lookup.csv`, `Atira_Practice_Project_Brief.docx`,
+Upload `raw_pos_export.csv`, `store_lookup.csv`, the project brief document,
 `solution_hints.md`, `README.md`, and `scenario_and_tasks.txt` to the repo (drag-and-drop via
 the GitHub web UI, or push from a local clone).
 
