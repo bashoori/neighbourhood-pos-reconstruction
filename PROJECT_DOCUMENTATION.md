@@ -317,7 +317,58 @@ at.
 in a visibly different color and a caption naming it as an unmapped store code — the caveat is
 built into the chart itself, not left to a footnote someone might skip.
 
-### Next Steps — Task 7
+---
 
-Turn this into a 3-5 sentence, plain-language narrative for a non-technical stakeholder,
-naming the `ST99` caveat explicitly rather than only showing it in a chart color.
+## Task 7 — Write the Impact Story
+
+**Objective:** Turn the Task 6 findings into a 3-5 sentence, plain-language narrative for a
+non-technical stakeholder, naming caveats explicitly rather than leaving them only in a chart
+color or a notebook comment.
+
+**Deliverable:** `IMPACT_STORY.md`
+
+> Over the period covered by this export, home goods and everyday items like notebooks and
+> mugs drove the most revenue, and returns were rare — well under 2% of all purchases. About a
+> third of total revenue is tied to a store code that has no matching entry in the store list,
+> so revenue-by-store figures should be treated as directional, not exact, until that's sorted
+> out with whoever manages the register system. A handful of transactions had missing or
+> unreadable timestamps in the original export and had to be pieced back together using other
+> clues in the data — normal for this kind of raw export, but it means a few individual
+> transaction records are best-effort reconstructions rather than exact copies of what was
+> rung up. None of this changes the overall picture — the shop's top sellers and category mix
+> are clear — but the store mismatch is worth resolving before these numbers go into anything
+> official.
+
+Why it's written this way: no column names, no "reconstructed_txn_id," no mention of pandas or
+SQL — a stakeholder needs to know *what to trust, what to double-check, and why*, not how it
+was built. The `ST99` caveat is named directly (not just "some transactions") because a
+one-third revenue exposure is material enough that burying it in vague language would be
+misleading.
+
+---
+
+## Project Complete — Summary
+
+All 7 tasks from the original brief are done, verified, and documented:
+
+| Task | Deliverable | Status |
+|---|---|---|
+| 1. Profile the data | `01_profile.ipynb` | Done |
+| 2. Validate assumptions | `02_validate_assumptions.ipynb` | Done |
+| 3. Reconstruct invoices | `03_reconstruct_invoices.ipynb`, `output/practice.db` | Done |
+| 4. Data model | `sql/schema.sql`, `04_model.ipynb`, ERD | Done |
+| 5. Store reconciliation | Documented above; implemented in `04_model.ipynb` | Done |
+| 6. Analysis + chart | `06_analysis.ipynb`, `output/revenue_by_store.png` | Done |
+| 7. Impact story | `IMPACT_STORY.md` | Done |
+
+One open item carried forward honestly rather than swept under the rug: whether the `ST01`
+date-only timestamp merge (`INV-1007`/`INV-1013`) is still present after the final Task 3
+fixes was flagged but not conclusively re-verified — worth a final check with the
+`multi_invoice` query in `03_reconstruct_invoices.ipynb` before calling this fully closed.
+
+This project now doubles as a portfolio piece: it demonstrates profiling discipline,
+assumption testing (and being wrong about one, then fixing it), debugging a non-obvious
+pandas/sort-order bug with root-cause evidence rather than guesswork, defensible schema design
+with nullable fields and placeholder rows instead of silent data loss, a quantified migration
+judgment call with an escalation recommendation, a caught-and-fixed data quality bug found
+during analysis, and a stakeholder narrative that translates all of it into plain language.
