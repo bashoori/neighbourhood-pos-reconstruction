@@ -72,7 +72,7 @@ Compare `store_id` values in the export against `store_lookup.csv`. Decide and d
 
 Using Python/pandas or Power Query, produce: revenue by category and by store, top 5 products by revenue, and a return rate. Make one simple chart (bar or line) that would support a stakeholder narrative.
 
-![Revenue by store](output/revenue_by_store.png)
+![Revenue by store](images/revenue_by_store.png)
 
 `ST99` (red) is a store code with no match in `store_lookup.csv` — carrying ~33% of revenue, it's called out directly on the chart rather than left for a footnote. Full analysis: `notebooks/06_analysis.ipynb`.
 
@@ -97,7 +97,7 @@ decision is in `PROJECT_DOCUMENTATION.md`, Task 4. Physical schema: `sql/schema.
 - [x] Your invoice reconstruction logic (script or query) plus the resulting transaction-level table — `notebooks/03_reconstruct_invoices.ipynb`, `output/practice.db`
 - [x] An ERD and T-SQL `CREATE TABLE` statements for the normalized model — `images/neighbourhood_pos_erd.png`, `sql/schema.sql`
 - [x] A short write-up of how you resolved the `store_id` mismatch — `05_STORE_RECONCILIATION.md`
-- [x] Analysis output: category/store revenue, top products, return rate, one chart — `notebooks/06_analysis.ipynb`, `output/revenue_by_store.png`
+- [x] Analysis output: category/store revenue, top products, return rate, one chart — `notebooks/06_analysis.ipynb`, `images/revenue_by_store.png`
 - [x] A 3–5 sentence stakeholder-facing narrative — `07_IMPACT_STORY.md`
 
 Full task-by-task reasoning, findings, and verification for all 7 tasks: `PROJECT_DOCUMENTATION.md`.
@@ -137,7 +137,8 @@ neighbourhood-pos-reconstruction/
 │   └── store_lookup.csv
 ├── images/
 │   ├── neighbourhood_pos_erd.png
-│   └── neighbourhood_pos_erd.svg
+│   ├── neighbourhood_pos_erd.svg
+│   └── revenue_by_store.png
 ├── notebooks/
 │   ├── 01_profile.ipynb
 │   ├── 02_validate_assumptions.ipynb
@@ -147,6 +148,5 @@ neighbourhood-pos-reconstruction/
 ├── sql/
 │   └── schema.sql
 └── output/
-    ├── practice.db
-    └── revenue_by_store.png
+    └── practice.db
 ```

@@ -332,9 +332,11 @@ can tell different stories (a few high-value returns vs. many low-value ones), a
 stakeholder deciding whether to worry about returns needs to know which one they're looking
 at.
 
-**Chart:** bar chart of revenue by store (`output/revenue_by_store.png`), with `ST99` rendered
-in a visibly different color and a caption naming it as an unmapped store code — the caveat is
-built into the chart itself, not left to a footnote someone might skip.
+**Chart:** bar chart of revenue by store, with `ST99` rendered in a visibly different color
+and a caption naming it as an unmapped store code — the caveat is built into the chart itself,
+not left to a footnote someone might skip.
+
+![Revenue by store](images/revenue_by_store.png)
 
 ---
 
@@ -377,7 +379,7 @@ All 7 tasks from the original brief are done, verified, and documented:
 | 3. Reconstruct invoices | `03_reconstruct_invoices.ipynb`, `output/practice.db` | Done |
 | 4. Data model | `sql/schema.sql`, `04_model.ipynb`, ERD | Done |
 | 5. Store reconciliation | Documented above; implemented in `04_model.ipynb` | Done |
-| 6. Analysis + chart | `06_analysis.ipynb`, `output/revenue_by_store.png` | Done |
+| 6. Analysis + chart | `06_analysis.ipynb`, `images/revenue_by_store.png` | Done |
 | 7. Impact story | `07_IMPACT_STORY.md` | Done |
 
 No open items remain. The one loose thread — whether the `ST01` date-only timestamp merge
