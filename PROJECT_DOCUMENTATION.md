@@ -202,9 +202,122 @@ Built and tested end to end before handing off:
   line→product FK), each via anti-join since SQLite doesn't enforce FKs by default — **all
   four passed with zero orphans.**
 
-### Next Steps — Task 5
+---
 
-Resolve and formally document the store reference mismatch (already handled structurally via
-the `ST99` placeholder row in `dim_store` — Task 5 is about writing up the reasoning behind
-that decision explicitly, as the brief requires a documented judgment call, not just a working
-schema).
+## Task 5 — Resolve the Store Reference Mismatch
+
+**Objective:** Decide and document how to handle store IDs that appear in one file but not the
+other (Task 1 finding: `ST99` in the export, missing from `store_lookup.csv`; `ST04` in the
+lookup table, never used in the export).
+
+### Scope check first
+
+Before deciding how to handle `ST99`, the honest first question is *how much of the data does
+this actually touch* — "it's just one bad store code" and "a third of the dataset has no
+verified store name" call for very different responses.
+
+```python
+# how much of the reconstructed data is tied to the unmapped store?
+txn_count = pd.read_sql("SELECT COUNT(*) AS n FROM fact_transaction WHERE store_id = 'ST99'", conn)["n"].iloc[0]
+total_txn = pd.read_sql("SELECT COUNT(*) AS n FROM fact_transaction", conn)["n"].iloc[0]
+print(f"transactions at ST99: {txn_count} / {total_txn} ({txn_count/total_txn*100:.1f}%)")
+```
+
+**Result:**
+
+| Metric | ST99 | Total | Share |
+|---|---|---|---|
+| Transactions | 23 | 63 | **36.5%** |
+| Line items | 42 | 131 | **32.1%** |
+| Revenue | $1,956.24 | $5,858.64 | **33.4%** |
+
+This is not a rounding-error edge case — roughly a third of all reconstructed revenue is tied
+to a store code with no confirmed name. That materially changes the right response.
+
+### Options considered
+
+1. **Drop transactions tied to `ST99`.** Rejected — destroys real transaction and revenue
+   data because a reference table is incomplete, and at ~33% of revenue this would badly
+   understate the business's actual activity.
+2. **Leave an orphaned foreign key** (`fact_transaction.store_id` pointing to nothing in
+   `dim_store`). Rejected — breaks referential integrity, causes silent join failures in any
+   downstream report (a `JOIN` on `store_id` would just drop these rows without warning,
+   which is worse than an error), and hides the problem instead of surfacing it.
+3. **Add an explicit placeholder row in `dim_store`** (`store_name = 'UNKNOWN / UNMAPPED'`).
+   **Chosen.** Preserves all transaction and revenue data, keeps referential integrity intact,
+   and makes the gap impossible to miss — any report grouping by store immediately shows an
+   `UNKNOWN / UNMAPPED` line with its real dollar figure attached, rather than the data
+   quietly vanishing.
+4. **Leave `ST04` in `dim_store` even though it's unused in the export.** No action needed —
+   a store existing in the reference table with no recent transaction activity isn't a data
+   quality problem, it's just an inactive or not-yet-opened location. Removing it would
+   destroy valid reference data to solve a problem that doesn't exist.
+
+### Decision and escalation note
+
+Implemented as the `UNKNOWN / UNMAPPED` placeholder row in `dim_store` (see
+`04_model.ipynb`, Task 4). This is a defensible **interim** engineering resolution for a
+practice project — it keeps the pipeline running and the data honest about what it doesn't
+know.
+
+In a real migration, given this affects roughly a third of revenue, this would **not** be a
+call to make unilaterally as the engineer. The right move is to escalate directly to whoever
+owns the POS/store master data with a specific question: *"`ST99` shows up in 23 transactions
+worth about $1,956 in the export but doesn't exist in the store reference list — is this a new
+location that hasn't been added yet, a decommissioned store code still active on a terminal,
+or a data entry error?"* The placeholder keeps the data usable and correctly flagged while
+that conversation happens, instead of blocking the pipeline on an answer that isn't the
+engineer's to give.
+
+---
+
+---
+
+## Task 6 — Generate Analysis and a Chart
+
+**Objective:** Revenue by category and by store, top 5 products by revenue, a return rate, and
+one chart — built on `fact_transaction` / `fact_transaction_line`, with the `ST99` finding
+from Task 5 carried forward as a required caveat.
+
+### A canonicalization bug found while building this
+
+Before trusting the "top 5 products" output, the labels were checked by eye — and one was
+wrong: `Ceramic Mug` showed up as `ceramic mug` (lowercase, from one of its messier raw source
+variants). The `dim_product` build in Task 4 picked the *most frequent raw value* as the
+canonical spelling, without normalizing case first, so whichever variant happened to occur
+most often — clean or not — won.
+
+**Fix:** replaced the ad hoc per-column cleanup with one shared `clean_text()` function
+(strip whitespace, collapse repeated spaces, title-case, then pick the most frequent
+*normalized* value) applied consistently to `customer_name`, `product_name`, and `category`.
+Email gets its own `clean_email()` (lowercase instead of title-case, since that's the
+convention for email addresses). `04_model.ipynb` (Task 4) was patched retroactively — this is
+documented here rather than silently fixed, because it's a real example of a data quality rule
+that needs to be a *general policy* applied everywhere a free-text attribute exists, not a
+patch applied only where it was first noticed.
+
+### Results
+
+| Metric | Result |
+|---|---|
+| Top category by revenue | Home (~$1,902) |
+| Top store by revenue | `ST99` (~$1,956, **~33% of total** — unmapped, see Task 5) |
+| Top product by revenue | Notebook - Recycled (~$900) |
+| Return rate | 1.5% of line items, 0.6% of gross revenue by dollar value |
+
+Note: exact figures depend on the random seed used to generate the practice dataset, but the
+`ST99` caveat requirement holds regardless of the specific numbers.
+
+**Return rate reported two ways deliberately** — rate by line count and rate by dollar value
+can tell different stories (a few high-value returns vs. many low-value ones), and a
+stakeholder deciding whether to worry about returns needs to know which one they're looking
+at.
+
+**Chart:** bar chart of revenue by store (`output/revenue_by_store.png`), with `ST99` rendered
+in a visibly different color and a caption naming it as an unmapped store code — the caveat is
+built into the chart itself, not left to a footnote someone might skip.
+
+### Next Steps — Task 7
+
+Turn this into a 3-5 sentence, plain-language narrative for a non-technical stakeholder,
+naming the `ST99` caveat explicitly rather than only showing it in a chart color.

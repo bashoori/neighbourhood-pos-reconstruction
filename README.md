@@ -71,6 +71,14 @@ Using Python/pandas or Power Query, produce: revenue by category and by store, t
 
 In 3–5 plain-language sentences, summarize what the data shows and flag any caveats a non-technical stakeholder should know about (e.g., "revenue by store is directional, not exact, because roughly N% of transactions couldn't be reliably grouped"). This is the requirements-elicitation and communication skill the job posting calls out directly.
 
+## Entity Relationship Diagram
+
+![ERD for neighbourhood-pos-reconstruction](images/neighbourhood_pos_erd.png)
+
+Three reference tables (`dim_customer`, `dim_store`, `dim_product`) feed two fact tables
+(`fact_transaction`, `fact_transaction_line`). Full reasoning behind each key and nullability
+decision is in `PROJECT_DOCUMENTATION.md`, Task 4. Physical schema: `sql/schema.sql`.
+
 ## Deliverables Checklist
 
 - [ ] Data profiling notes (with actual counts, not just observations)
@@ -106,11 +114,24 @@ A separate file, `solution_hints.md`, is included alongside the data files — i
 ```
 neighbourhood-pos-reconstruction/
 ├── README.md
+├── PROJECT_DOCUMENTATION.md
+├── SETUP.md
+├── solution_hints.md
 ├── data/
 │   ├── raw_pos_export.csv
 │   └── store_lookup.csv
+├── images/
+│   ├── neighbourhood_pos_erd.png
+│   └── neighbourhood_pos_erd.svg
 ├── notebooks/
+│   ├── 01_profile.ipynb
+│   ├── 02_validate_assumptions.ipynb
+│   ├── 03_reconstruct_invoices.ipynb
+│   ├── 04_model.ipynb
+│   └── 06_analysis.ipynb
 ├── sql/
-├── output/
-└── solution_hints.md
+│   └── schema.sql
+└── output/
+    ├── practice.db
+    └── revenue_by_store.png
 ```
