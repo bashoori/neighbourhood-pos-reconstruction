@@ -72,6 +72,10 @@ Compare `store_id` values in the export against `store_lookup.csv`. Decide and d
 
 Using Python/pandas or Power Query, produce: revenue by category and by store, top 5 products by revenue, and a return rate. Make one simple chart (bar or line) that would support a stakeholder narrative.
 
+![Revenue by store](output/revenue_by_store.png)
+
+`ST99` (red) is a store code with no match in `store_lookup.csv` — carrying ~33% of revenue, it's called out directly on the chart rather than left for a footnote. Full analysis: `notebooks/06_analysis.ipynb`.
+
 ### 7. Write the impact story
 
 In 3–5 plain-language sentences, summarize what the data shows and flag any caveats a non-technical stakeholder should know about (e.g., "revenue by store is directional, not exact, because roughly N% of transactions couldn't be reliably grouped"). This is the requirements-elicitation and communication skill the job posting calls out directly.
